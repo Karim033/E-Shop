@@ -41,6 +41,10 @@ connectDB();
 // Mount routes
 mountRoutes(app);
 
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
 app.all("*", (req, res, next) => {
   // Create error and send it to error handler middleware
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 400));
