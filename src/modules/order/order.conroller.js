@@ -2,12 +2,14 @@ import asyncHandler from "express-async-handler";
 import CartModel from "../../../DB/Models/cart.model.js";
 import OrderModel from "../../../DB/Models/order.model.js";
 import ProductModel from "../../../DB/Models/product.model.js";
+import UserModel from "../../../DB/Models/user.model.js";
 import * as factory from "../../handlers-factory.js";
 import AppError from "../../../utils/appError.js";
 import Stripe from "stripe";
 import dotenv from "dotenv";
 dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
 // @desc Create cash order
 // @route POST /api/v1/order/:cartId
 // @access Private/User
@@ -133,13 +135,45 @@ export const checkoutSession = asyncHandler(async (req, res, next) => {
     client_reference_id: req.params.cartId,
     metadata: req.body.shippingAddress,
   });
-
   // 4) Send session to response
   res.status(200).json({
     status: "success",
     session,
   });
 });
+
+const createOnlineOrder = async (session) => {
+  const cartId = session.client_reference_id;
+  const shippingAddress = session.metadata;
+  const orderPrice = session.disply_items[0].amount / 100;
+
+  const cart = await CartModel.findById(cartId);
+  const user = await UserModel.findOne({ email: session.customer_email });
+
+  // 3) Create order with default paymentMethod card
+  const order = await OrderModel.create({
+    user: user._id,
+    cartItems: cart.cartItems,
+    shippingAddress,
+    totalOrderPrice: orderPrice,
+    isPaid: true,
+    paidAt: Date.now(),
+    paymentMethodType: "card",
+  });
+  // 4) After creating order , decrement product quantity and increment product sold
+  if (order) {
+    const bulkOption = cart.cartItems.map((item) => ({
+      updateOne: {
+        filter: { _id: item.product },
+        update: { $inc: { quantity: -item.quantity, sold: +item.quantity } },
+      },
+    }));
+    await ProductModel.bulkWrite(bulkOption, {});
+    // 5) Delete user cart depend on cart id
+    await CartModel.findByIdAndDelete(cartId);
+  }
+  res.status(200).json({ status: "success", data: order });
+};
 
 export const webhookCheckout = asyncHandler(async (req, res, next) => {
   const sig = req.headers["stripe-signature"];
@@ -154,6 +188,8 @@ export const webhookCheckout = asyncHandler(async (req, res, next) => {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
   if (event.type === "checkout.session.completed") {
-    console.log("Create order here.........");
+    // Create order
+    createOnlineOrder(event.data.object);
   }
+  res.status(200).json({ received: true });
 });
