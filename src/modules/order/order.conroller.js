@@ -175,6 +175,9 @@ const createOnlineOrder = async (session) => {
   res.status(200).json({ status: "success", data: order });
 };
 
+// @desc This  webhook will run stripe payment success paid
+// @route POST /webhook-checkout
+// @access Private/User
 export const webhookCheckout = asyncHandler(async (req, res, next) => {
   const sig = req.headers["stripe-signature"];
   let event;
