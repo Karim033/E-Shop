@@ -31,7 +31,7 @@ app.options("*", cors());
 app.use(compression());
 // checkout webhook
 app.post(
-  "/webhook-checkout",
+  "/api/v1/webhook-checkout",
   express.raw({ type: "application/json" }),
   webhookCheckout
 );
