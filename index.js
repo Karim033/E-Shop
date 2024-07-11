@@ -11,6 +11,8 @@ import connectDB from "./DB/connection.js";
 
 // Routers
 import mountRoutes from "./src/mount.routes.js";
+// checkout webhook
+import { webhookCheckout } from "./src/modules/order/order.conroller.js";
 
 // Error Handling
 import AppError from "./utils/appError.js";
@@ -27,6 +29,12 @@ app.use(cors());
 app.options("*", cors());
 // Compression response
 app.use(compression());
+// checkout webhook
+app.post(
+  "/webhook-checkout",
+  express.raw({ type: "application/json" }),
+  webhookCheckout
+);
 // middlewares
 app.use(express.json());
 app.use(express.static(path.join("uploads")));
