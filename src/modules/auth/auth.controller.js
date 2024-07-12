@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { sendEmail } from "../../../utils/sendEmail.js";
 import { createToken } from "../../../utils/createToken.js";
+import { sanitizeUser } from "../../../utils/sanitized-data.js";
 
 // @desc Sign Up
 // @route POST /api/v1/auth/signup
@@ -17,7 +18,7 @@ export const signUp = asyncHandler(async (req, res, next) => {
     password: req.body.password,
   });
   const token = createToken(user._id);
-  res.status(201).json({ data: user, token });
+  res.status(201).json({ data: sanitizeUser(user), token });
 });
 // @desc login
 // @route POST /api/v1/auth/login
@@ -28,7 +29,7 @@ export const login = asyncHandler(async (req, res, next) => {
     return next(new AppError("Invalid email or password", 401));
   }
   const token = createToken(user._id);
-  res.status(200).json({ data: user, token });
+  res.status(200).json({ data: sanitizeUser(user), token });
 });
 
 // @desc make sure the user is logged in

@@ -6,6 +6,11 @@ import dotenv from "dotenv";
 import morgan from "morgan";
 import cors from "cors";
 import compression from "compression";
+import rateLimit from "express-rate-limit";
+import hpp from "hpp";
+import ExpressMongoSanitize from "express-mongo-sanitize";
+import { xss } from "express-xss-sanitizer";
+import helmet from "helmet";
 // DB connection
 import connectDB from "./DB/connection.js";
 
@@ -36,12 +41,40 @@ app.post(
   webhookCheckout
 );
 // middlewares
-app.use(express.json());
+app.use(express.json({ limit: "2kb" }));
 app.use(express.static(path.join("uploads")));
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
   console.log(`mode: ${process.env.NODE_ENV}`);
 }
+
+// To Avoid NoSQL query injection
+app.use(ExpressMongoSanitize());
+// To Avoid XSS attacks
+app.use(xss());
+// Apply the rate limiting middleware to all requests.
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+  message: "Too many requests from this IP, please try again later.",
+});
+app.use("/api", limiter);
+
+// Express middleware to protect against HTTP Parameter Pollution attacks
+app.use(
+  hpp({
+    whitelist: [
+      "price",
+      "sold",
+      "quantity",
+      "ratingsAverage",
+      "ratingsQuantity",
+    ],
+  })
+);
+
+// set security HTTP headers
+app.use(helmet());
 
 // DB connection
 connectDB();

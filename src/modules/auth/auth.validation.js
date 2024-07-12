@@ -8,7 +8,7 @@ export const signUpValidation = [
     .notEmpty()
     .withMessage("Name is required")
     .isLength({ min: 3 })
-    .withMessage("Too short category name")
+    .withMessage("Too short user name")
     .custom((value, { req }) => {
       req.body.slug = slugify(value);
       return true;
