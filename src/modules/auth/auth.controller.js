@@ -18,6 +18,14 @@ export const signUp = asyncHandler(async (req, res, next) => {
     password: req.body.password,
   });
   const token = createToken(user._id);
+  const cokkieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRE_TIME * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  };
+  if (process.env.NODE_ENV === "production") cokkieOptions.secure = true;
+  res.cookie("jwt", token, cokkieOptions);
   res.status(201).json({ data: sanitizeUser(user), token });
 });
 // @desc login
@@ -29,6 +37,14 @@ export const login = asyncHandler(async (req, res, next) => {
     return next(new AppError("Invalid email or password", 401));
   }
   const token = createToken(user._id);
+  const cokkieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRE_TIME * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  };
+  if (process.env.NODE_ENV === "production") cokkieOptions.secure = true;
+  res.cookie("jwt", token, cokkieOptions);
   res.status(200).json({ data: sanitizeUser(user), token });
 });
 
