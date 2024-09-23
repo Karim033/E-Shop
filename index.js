@@ -18,7 +18,6 @@ import connectDB from "./DB/connection.js";
 import mountRoutes from "./src/mount.routes.js";
 // checkout webhook
 import { webhookCheckout } from "./src/modules/order/order.conroller.js";
-
 // Error Handling
 import AppError from "./utils/appError.js";
 import globalError from "./middlewares/errorMiddleware.js";
@@ -78,7 +77,6 @@ app.use(helmet());
 
 // DB connection
 connectDB();
-
 // Mount routes
 mountRoutes(app);
 

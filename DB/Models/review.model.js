@@ -14,7 +14,7 @@ const reviewSchema = new mongoose.Schema(
       ref: "User",
       required: [true, "Review must belong to a user"],
     },
-    // Parent reference (onr to many)
+    // Parent reference (one to many)
     product: {
       type: mongoose.Schema.ObjectId,
       ref: "Product",
@@ -54,6 +54,7 @@ reviewSchema.statics.calcAvgRatingsAndQuantity = async function (productId) {
     });
   }
 };
+
 reviewSchema.post("save", function () {
   this.constructor.calcAvgRatingsAndQuantity(this.product);
 });
