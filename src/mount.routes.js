@@ -11,8 +11,6 @@ import couponRouter from "./modules/coupon/coupon.routes.js";
 import cartRouter from "./modules/cart/cart.routes.js";
 import orderRouter from "./modules/order/order.routes.js";
 import oAuthWithGoogleRouter from "./modules/0Auth/0AuthWithGoogle/0Auth.routes.js";
-import oAuthWithFacebookRouter from "./modules/0Auth/0AuthWithFacebook/0Auth.routes.js";
-import oAuthWithTwitterRouter from "./modules/0Auth/0AuthWithTwitter/0Auth.routes.js";
 const mountRoutes = (app) => {
   app.use("/api/v1/categories", categoryRouter);
   app.use("/api/v1/subcategories", subCategoryRouter);
@@ -27,8 +25,6 @@ const mountRoutes = (app) => {
   app.use("/api/v1/cart", cartRouter);
   app.use("/api/v1/order", orderRouter);
   app.use("/", oAuthWithGoogleRouter);
-  app.use("/", oAuthWithFacebookRouter);
-  app.use("/", oAuthWithTwitterRouter);
 };
 
 export default mountRoutes;
