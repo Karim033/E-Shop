@@ -40,7 +40,8 @@ export const login = asyncHandler(async (req, res, next) => {
   const token = createToken(user._id);
   const cokkieOptions = {
     expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRE_TIME * 24 * 60 * 60 * 1000
+      Date.now() +
+        Number(process.env.JWT_COOKIE_EXPIRE_TIME || 90) * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
   };
